@@ -1,0 +1,49 @@
+name: Build Kernel
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      args: |+
+        -j4 ARCH=arm64 O=out CC=clang
+        CROSS_COMPILE=aarch64-linux-gnu-
+        CROSS_COMPILE_ARM32=arm-linux-gnueabi-
+        CROSS_COMPILE_COMPAT=arm-linux-gnueabi-
+    strategy:
+      fail-fast: false
+      matrix:
+        devices:
+          - name: K40Gaming
+            config: ares_user_defconfig
+    name: Build Kernel for ${{ matrix.devices.name }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Package
+        run: sudo apt install -y p7zip-full
+      - name: Setup Cross-compile toolchain
+        run: |
+          cd ..
+          mkdir -p .toolchain
+          cd .toolchain
+          wget -q https://github.com/Mandi-Sa/clang/releases/download/amd64-kernel-arm-19/llvm19.0.0-binutils2.42.50_amd64-kernel-arm_20240204.7z
+          7za x llvm19.0.0-binutils2.42.50_amd64-kernel-arm_20240204.7z
+          rm llvm19.0.0-binutils2.42.50_amd64-kernel-arm_20240204.7z
+      - name: Setup KernelSU
+        run: |
+          curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s main
+      - name: Build Kernel for ${{ matrix.devices.name }}
+        run: |
+          pwd
+          export PATH=$PWD/../.toolchain/bin:$PATH
+          make clean && make mrproper
+          make ${args} ${{ matrix.devices.config }}
+          make ${args}
+          cp out/arch/arm64/boot/Image.gz-dtb AnyKernel3/
+      - name: Pack kernel image with AnyKernel3
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.devices.name }}_Kernel
+          path: AnyKernel3
