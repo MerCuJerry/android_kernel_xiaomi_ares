@@ -24,12 +24,12 @@ jobs:
           cd ..
           mkdir -p .toolchain
           cd .toolchain
-          wget -q https://github.com/Mandi-Sa/clang/releases/download/amd64-kernel-arm-19/llvm19.0.0-binutils2.42.50_amd64-kernel-arm_20240204.7z
-          7za x llvm19.0.0-binutils2.42.50_amd64-kernel-arm_20240204.7z
-          rm llvm19.0.0-binutils2.42.50_amd64-kernel-arm_20240204.7z
+          wget -q https://github.com/Mandi-Sa/clang/releases/download/amd64-kernel-arm_static-20/llvm20.0.0-binutils2.42_amd64-kernel-arm_static-20240906.7z
+          7za x llvm20.0.0-binutils2.42_amd64-kernel-arm_static-20240906.7z
+          rm llvm20.0.0-binutils2.42_amd64-kernel-arm_static-20240906.7z
       - name: Setup KernelSU
         run: |
-          curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s main
+          curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s v0.9.5
       - name: Build Kernel for K40Gaming
         run: |
           pwd
